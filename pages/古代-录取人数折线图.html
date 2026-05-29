@@ -1,0 +1,189 @@
+<!--
+	此示例下载自 https://echarts.apache.org/examples/zh/editor.html?c=line-stack&code=zVZbTxtHFH7Pr1gpqkwki6zXl9qu-tCktJUaqQ9EiqqUh_F6bY-y3rXWSwmNkEgDiQgQOwmOuIYAQaGtIAQIF5vLj4l31vvUv9AzO7NrGwNplD7UQsvumZlzvvnOmW-OXjCxrglfC_cuCcLVq4KzPNLYOHaGS2T6SePBBJl5C_YUku9kDb1fS1_XVd1ICgHTQFqxgAxFMwNBmMEWk1ePnOVpWG8fbdRPFsjEfav02ll5AqMmNlUl6UaBD-WuCU7I_mi9tmKVR8j8QuNkzlr5yzqqWKUX9WqVVDYbu-PW4xPXuyAU-1PeosommdwgC6ukWv77cPbD8GNACp6YAwhvlSft5afg6cPw-C9aFxmuMX8wWYrFIwn4usK9qkqGupRhF4rBbaZeAJP0hfcJUXvNwSZ2QcjomvkdymN1ECb-iPBNHBR6cb63XwsKRcXAGb6UzezFv8FaKeLZZM7g5agcRlIoEGwSVz9esEd2GXFk711jbKteW3Uqj-pHJXuq5iwst7i9peBsjoLXdCOP1IA7NNRG1n8AO9QJO56KpaJRf66KNeUHjkUSGQp4ukhYUVgbK3Z135rcaxztNHbWyMiiPTtCSmX7dZUsPaSloeuqiYF1XhwGzmYVGgvdxUUeqLMCjWwKdUmRSFCQwnF4AMOC2J2A1NK4sEI30orhzb6cklEi7m2Rjd3CaTMHezw30R2p-hwmY60ZytCkmVB04OBeagjqX4Cw8pAAxUlT6dGXNXDaw8OLNepVJtDkFkDcM6R009TzYAmJfvWyYvarWQY8CGs3UEpRk8B0v9IS7O43wLefhcECoA7IyFSyujHI16eRiZLC7YCzVCVbNaA6YFX37Icz9M2ZmyTrK_StfnDszD50R6fHrKr75tx_bo2OubZn-_X9TfetPOF5GR2za38G-lgUmvcbUFeARSjm9IGkkEFqUfHIo8M3sXzngmG-wU8v_YtSfvpI5JGRxRpYoh1lP3gGlb8itV_hDjWUp6auVr3zRImO3fyc43veUUUqzgLcgFs4bYLxfyCcg23TsYKKTY6rRW5OEeMTnEbFnJL2PTd9u1IRCieCQkj8MijEo1QpQtErAaYULHXtCaQgFcjgbXfEC8XTxq4aljU_HAdBAfq2Yl7XqcTQg-bqvHWwTWpPydyWXT3hc_g_egmwm228bP9-QF7tWYclMrdDXmzW96uN9-v24rZTG_EcD-ZTOvAdkLEhqy0BXTsvVMmzYlPJd5DmE_9tTyIRE9k95Me5ar8Zt0q7zYgdgtrT0xO7fo0ts6fWyMv75P0oKLs9NgOr6N11NA_IYS_24XDjGJ7Tp1xx_fVhAvwcSusD19R-iBAST9vblV-SIJ3RcFBIxGg6aTZp--KGBhgsIpmpkMXnXpY9h03KIQ1kYamV7IvqbIAB9gXgYySeva_oJ-0rQi80WhyLU9azCdgY2yHZ3LGO_nCm4fnulLufMpmiYv6cFNiNc-a-oZew37wl-2WrxDmiWry-6hcc5JJTuV3z5MNQ0HlVpCkDgiLnkGEWu7MGKuSw3E0PLjK-N1AaQ3_VJcJu3L9QkJ8q9mv6oj_dBZ-EeW3mtpN8mqIwT_3SrvNgDbo8srfUSlJbDbTxcX543hOcHd5tN8KwE0kEDGK3yGvPqlYYgMbLSWt0lfc91QogaY3uv_ddOT9BoAXW8CG0hfb6sbM8Dy5YgrzybJdbmnoqy67O-LaCXsS0uaftul44Qxc_UrX_XsTb7sdw05rGRRNpMrWy1rBzr7yjCIsxUOWIGAduQ5EESHU0HKe9XVwCosNSzBXvCOQ7FKVzImJC7PNVu-_S0Ff_AA&enc=deflate
+	⚠ 请注意，该图表不是 Apache ECharts 官方示例，而是由用户代码生成的。请注意鉴别其内容。
+-->
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="height: 100%; margin: 0">
+  <div id="container" style="height: 100%"></div>
+
+  
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  
+  <!-- Uncomment this line if you want to dataTool extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/extension/dataTool.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use gl extension
+  <script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-gl/dist/echarts-gl.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-stat extension
+  <script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-stat/dist/ecStat.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-graph-modularity extension
+  <script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-graph-modularity/dist/echarts-graph-modularity.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use map
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+  -->
+  <!-- Uncomment these two lines if you want to use bmap extension
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_API_KEY"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/extension/bmap.min.js"></script>
+  -->
+
+  <script type="text/javascript">
+    var dom = document.getElementById('container');
+    var myChart = echarts.init(dom, null, {
+      renderer: 'canvas',
+      useDirtyRect: false
+    });
+    var app = {};
+    
+    var option;
+
+    option = {
+  // 预设透明背景
+  backgroundColor: 'transparent',
+  
+  // 标题设置保持古风
+  title: {
+    text: '清代各朝进士录取人数趋势',
+    subtext: '数据来源：《明清进士题名碑录》\n(总人数：26849人)',
+    left: 'center',
+    top: '2%',
+    textStyle: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      fontSize: 24,
+      color: '#5c3a21', // 标题依然保持深色以镇住画面
+      fontWeight: 'normal'
+    },
+    subtextStyle: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      fontSize: 14,
+      color: '#8b6b55',
+      lineHeight: 20
+    }
+  },
+  
+  // 宣纸卷轴质感的提示框
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: 'rgba(244, 238, 224, 0.9)', 
+    borderColor: '#bca98f',
+    borderWidth: 1,
+    textStyle: {
+      color: '#5c3a21',
+      fontFamily: 'KaiTi, SimSun, serif',
+      fontSize: 16
+    },
+    formatter: '{b}朝 : {c} 人'
+  },
+  
+  grid: {
+    left: '5%',
+    right: '8%',
+    bottom: '10%',
+    top: '22%',
+    containLabel: true
+  },
+  
+  xAxis: {
+    type: 'category',
+    data: ['顺治', '康熙', '雍正', '乾隆', '嘉庆', '道光', '咸丰', '同治', '光绪'],
+    axisLine: { show: false },
+    axisTick: { show: false },
+    axisLabel: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      color: '#5c3a21',
+      fontSize: 14,
+      margin: 15
+    }
+  },
+  
+  yAxis: {
+    type: 'value',
+    name: '(录取人数)',
+    nameTextStyle: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      color: '#8b6b55',
+      align: 'right'
+    },
+    axisLine: { show: false },
+    axisTick: { show: false },
+    axisLabel: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      color: '#8b6b55'
+    },
+    splitLine: {
+      lineStyle: {
+        type: 'dashed',
+        color: 'rgba(139, 107, 85, 0.15)' 
+      }
+    }
+  },
+  
+  series: [
+    {
+      name: '进士人数',
+      type: 'line',
+      smooth: true, // 平滑曲线
+      
+      // 数据拐点样式更新为赭石黄
+      symbol: 'circle',
+      symbolSize: 12,
+      itemStyle: {
+        color: '#DE9960', // 赭石黄/秋叶黄
+        borderColor: '#EEE6CB', // 用极浅的牙黄色作为点缀边缘
+        borderWidth: 2,
+        shadowBlur: 10,
+        shadowColor: 'rgba(222, 153, 96, 0.5)' // 黄色的边缘晕染
+      },
+      
+      // 线条样式更新
+      lineStyle: {
+        width: 4,
+        color: '#DE9960', // 赭石黄
+        shadowBlur: 15,
+        shadowColor: 'rgba(222, 153, 96, 0.4)', // 柔和的黄色水彩阴影
+        shadowOffsetY: 6
+      },
+      
+      // 面积渐变晕染同步更新为浅黄色系
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          {
+            offset: 0,
+            color: 'rgba(222, 153, 96, 0.3)' // 顶部：淡黄色水彩晕染
+          },
+          {
+            offset: 1,
+            color: 'rgba(238, 230, 203, 0.05)' // 底部：融入宣纸底色
+          }
+        ])
+      },
+      
+      // 数值标签颜色同步
+      label: {
+        show: true,
+        position: 'top',
+        color: '#DE9960', // 赭石黄
+        fontFamily: 'KaiTi, SimSun, serif',
+        fontSize: 13,
+        distance: 10
+      },
+      
+      data: [3065, 4088, 1499, 5384, 2820, 3269, 1046, 1588, 4090]
+    }
+  ]
+};
+
+    if (option && typeof option === 'object') {
+      myChart.setOption(option);
+    }
+
+    window.addEventListener('resize', myChart.resize);
+  </script>
+</body>
+</html>

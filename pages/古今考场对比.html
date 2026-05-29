@@ -1,0 +1,170 @@
+<!--
+	此示例下载自 https://echarts.apache.org/examples/zh/editor.html?c=radar&code=tVZbTxtHFH7nV4yEqm1UK_EFuzZVH9qUqlKrvlApD4iHsXdtRl3vWrvrAEWRjIAGXBqb1m0CtUnSkBBaCQKJGrBD-C-Rd9b71L_QMzuzvizUanOxrL2cPZfvO_PN2dULFtE19DFaGEEojTPf5gy9qMlXdVU3xpFkGVgzC9hQNEsKgQf8r1xB7s2bTu3xq1LdOXzqtpbRB2DZ6KwdvSo1nK1lu7oO187TFt36tfNkyV350Tndh8AMzzkljX42kUolwlIISaMTExOJq59K0yE0Ai4WsVRl3MMCN8qcBRDsyk67Ve6Ulux6E0rSB_vt44d28xEUs3e2nNYz95e6vVTx4CFkFtMiztndaB-_BDzO2p5T_Z5uP3dri-i6idw_70A29mB3g5ZL9mGlUzsV4aqSZbEZ4KsYwmbpBTBF3_NvIf2kNd_DiVBW16zPcZ6o8-D4JSbfkBCaJPnJohZCpmKQrAjlnpPkO4iNjvk20RdpNJ6J4WhE8sw3Bui8hXqR8_WS6UQ6Hu_6qkRTvlBIbgY6EA1zFHAEJGxldF21CDRCrI1BcjmFZSGWkhcpzsvHyKXx-9GxsRCKxpJwANIofDkVv-RH6IasGL73aDqDU0kfPH92jcjWDKDntgKWZaLl4D7-r4sRbGd_K_5_0wJtUJWcosl-sbRuWXoe0sV9ccjYwkzi9Hil3XrAJch07tx6AvdceSD2NxfSMJYCeyKA3cAyhhBeiyucQY2HATxQAIELYOBIiiYkT7BHXIcFlVifGAqQW0DmjD47jrJYNRVfp3iOmF-BfnpUmJp8dl20nh4isVQIRcIfhlAyzuQQuyR5KHuiZ8WGZBO2XhMuTBv1Reb1er4AoZKMzRlFlvwMA1UZha9x_l0pSQiW266JbSaldVXuenfVPQUEIuHpfnREk0kGW94AFe4LSPPgSp2zbbtRbR_foj-stM8atN60V_-CNc3jOSgc9lMMRDSc5h90aY-u_mSXf4NpOtS9fXafLh7wQQll3DtH9ovy8ALeuHb2mu7tZ-5WzXnUGuouRnS1Tu8-ZAU2qwEGXgBrCJcy67ICCuWt8NdLJINQIGQfnNCDWre3QgDeHugazfk8LACb98TIqErAzhcu6RvFic27wK4NzKqor67-wXouZJY7x7oGeK_az4_s1Xvu5g5dK9H6Gmw0LOuzyD7cpqXdv1-ss8VdX3SaZ7Rx32keOEcnwVLwpsbnSukFnCEWiDV8Od7bPP-5HrzM7cZtmGhuqRKsJ05i7HVz92ojdB2rRYAzFQkzUcPuDCFvo4phM7B0g2Oz73l_13sULniFZLNZiVFzNk8BN61UOi9PaKXabrIvkN6vn_wg7T43rroBvhdTi3qsGDk2fS4iNjD_X4uY-GbyuNUe8-8tTs_-fdsu3-uc7tutn-ny3TfiKa7E6IHj9MiNj_4B&enc=deflate
+	⚠ 请注意，该图表不是 Apache ECharts 官方示例，而是由用户代码生成的。请注意鉴别其内容。
+-->
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="height: 100%; margin: 0">
+  <div id="container" style="height: 100%"></div>
+
+  
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  
+  <!-- Uncomment this line if you want to dataTool extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/extension/dataTool.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use gl extension
+  <script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-gl/dist/echarts-gl.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-stat extension
+  <script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-stat/dist/ecStat.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-graph-modularity extension
+  <script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-graph-modularity/dist/echarts-graph-modularity.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use map
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+  -->
+  <!-- Uncomment these two lines if you want to use bmap extension
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_API_KEY"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/extension/bmap.min.js"></script>
+  -->
+
+  <script type="text/javascript">
+    var dom = document.getElementById('container');
+    var myChart = echarts.init(dom, null, {
+      renderer: 'canvas',
+      useDirtyRect: false
+    });
+    var app = {};
+    
+    var option;
+
+    option = {
+  backgroundColor: 'transparent',
+  
+  // 采用“米黄 + 金色”的同色系暖调配置
+  color: ['#DE9960', '#EEE6CB'], 
+
+  title: {
+    text: '古今考场“森严度”多维镜像',
+    subtext: '科举的物理枷锁 vs 高考的科技屏蔽',
+    left: 'center',
+    top: '2%',
+    textStyle: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      fontSize: 24,
+      color: '#5c3a21'
+    },
+    subtextStyle: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      fontSize: 14,
+      color: '#8b6b55',
+      lineHeight: 20
+    }
+  },
+
+  tooltip: {
+    trigger: 'item',
+    backgroundColor: 'rgba(244, 238, 224, 0.95)',
+    borderColor: '#bca98f',
+    borderWidth: 1,
+    padding: 15,
+    textStyle: {
+      color: '#5c3a21',
+      fontFamily: 'KaiTi, SimSun, serif',
+      fontSize: 14
+    }
+  },
+
+  legend: {
+    bottom: '5%',
+    data: ['清代科举', '现代高考'],
+    textStyle: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      color: '#5c3a21',
+      fontSize: 16
+    }
+  },
+
+  radar: {
+    center: ['50%', '52%'],
+    radius: '60%',
+    splitArea: { show: false },
+    axisLine: {
+      lineStyle: { color: 'rgba(139, 107, 85, 0.3)' }
+    },
+    splitLine: {
+      lineStyle: { 
+        color: 'rgba(139, 107, 85, 0.2)',
+        type: 'dashed' 
+      }
+    },
+    axisName: {
+      color: '#5c3a21',
+      fontFamily: 'KaiTi, SimSun, serif',
+      fontSize: 15,
+      fontWeight: 'bold',
+      padding: [5, 10]
+    },
+    indicator: [
+      { name: '连坐与担保机制', max: 10 },
+      { name: '违纪惩戒力度', max: 10 },
+      { name: '信息屏蔽与防弊', max: 10 },
+      { name: '考场空间隔离', max: 10 },
+      { name: '物理搜查与限制', max: 10 }
+    ]
+  },
+
+  series: [
+    {
+      name: '制度对比',
+      type: 'radar',
+      symbol: 'circle',
+      symbolSize: 8,
+      
+      itemStyle: {
+        borderWidth: 2
+      },
+      lineStyle: {
+        width: 3
+        // 已删除所有 shadow 属性，保持线条纯粹
+      },
+      areaStyle: {
+        opacity: 0.5 
+        // 已删除所有 shadow 属性，保持色块清透
+      },
+      
+      data: [
+        {
+          value: [10, 10, 8, 9, 10],
+          name: '清代科举',
+          itemStyle: { 
+            borderColor: '#fff' // 白色描边提亮
+            // 已删除 shadow 属性
+          }
+        },
+        {
+          value: [2, 8, 10, 7, 8],
+          name: '现代高考',
+          itemStyle: { 
+            borderColor: '#DE9960' // 用金色描边增加轮廓感
+            // 已删除 shadow 属性
+          }
+        }
+      ]
+    }
+  ]
+};
+
+    if (option && typeof option === 'object') {
+      myChart.setOption(option);
+    }
+
+    window.addEventListener('resize', myChart.resize);
+  </script>
+</body>
+</html>

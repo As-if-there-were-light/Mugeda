@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<!-- saved from url=(0140)file:///C:/Users/admin/Desktop/%E6%95%B0%E6%8D%AE%E5%9B%BE/%E7%8E%B0%E4%BB%A3-%E5%85%A8%E5%9B%BD%E5%90%84%E7%9C%81985%E5%BD%95%E5%8F%96.html -->
+<html lang="zh-CN" style="height: 100%"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+</head>
+<body style="height: 100%; margin: 0">
+  <div id="container" style="height: 100%; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); position: relative;" _echarts_instance_="ec_1779688594863"><div style="position: relative; width: 605px; height: 753px; padding: 0px; margin: 0px; border-width: 0px; cursor: default;"><canvas data-zr-dom-id="zr_0" width="1210" height="1506" style="position: absolute; left: 0px; top: 0px; width: 605px; height: 753px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); padding: 0px; margin: 0px; border-width: 0px;"></canvas></div><div class="" style="position: absolute; display: block; border-style: solid; white-space: nowrap; z-index: 9999999; box-shadow: rgba(0, 0, 0, 0.2) 1px 2px 10px; transition: opacity 0.2s cubic-bezier(0.23, 1, 0.32, 1), visibility 0.2s cubic-bezier(0.23, 1, 0.32, 1), transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); background-color: rgba(244, 238, 224, 0.95); border-width: 1px; border-radius: 4px; color: rgb(92, 58, 33); font: 14px / 21px KaiTi, SimSun, serif; padding: 10px; top: 0px; left: 0px; transform: translate3d(935px, 644px, 0px); border-color: rgb(188, 169, 143); pointer-events: none; visibility: hidden; opacity: 0;" _msttexthash="13538967" _msthash="0"><b _msttexthash="5862077" _msthash="67">广西</b><font _mstmutation="1" _msttexthash="35308" _msthash="68">: 1.32%</font></div></div>
+
+  
+  <script type="text/javascript" src="./现代-全国各省985录取_files/echarts.min.js.下载"></script>
+  
+  <!-- Uncomment this line if you want to dataTool extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/extension/dataTool.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use gl extension
+  <script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-gl/dist/echarts-gl.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-stat extension
+  <script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-stat/dist/ecStat.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-graph-modularity extension
+  <script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-graph-modularity/dist/echarts-graph-modularity.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use map
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+  -->
+  <!-- Uncomment these two lines if you want to use bmap extension
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_API_KEY"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/extension/bmap.min.js"></script>
+  -->
+
+  <script type="text/javascript">
+    var dom = document.getElementById('container');
+    var myChart = echarts.init(dom, null, {
+      renderer: 'canvas',
+      useDirtyRect: false
+    });
+    var app = {};
+    
+    var option;
+
+    // 基于图片提取的31省市985录取率数据（为配合横向排版，已做升序排列）
+const rawData = [
+  { name: '安徽', value: 1.10 }, { name: '河南', value: 1.14 }, { name: '贵州', value: 1.19 },
+  { name: '山西', value: 1.30 }, { name: '广东', value: 1.32 }, { name: '广西', value: 1.32 },
+  { name: '云南', value: 1.33 }, { name: '江苏', value: 1.35 }, { name: '甘肃', value: 1.40 },
+  { name: '四川', value: 1.47 }, { name: '山东', value: 1.47 }, { name: '河北', value: 1.48 },
+  { name: '内蒙古', value: 1.54 }, { name: '江西', value: 1.55 }, 
+  // --- 全国平均线 1.62% ---
+  { name: '新疆', value: 1.68 }, { name: '湖南', value: 1.71 }, { name: '西藏', value: 1.73 },
+  { name: '海南', value: 1.80 }, { name: '浙江', value: 1.87 }, { name: '陕西', value: 1.88 },
+  { name: '黑龙江', value: 2.01 }, { name: '福建', value: 2.01 }, { name: '重庆', value: 2.13 },
+  { name: '湖北', value: 2.14 }, { name: '辽宁', value: 2.29 }, { name: '宁夏', value: 2.31 },
+  { name: '青海', value: 3.02 }, { name: '吉林', value: 3.56 }, { name: '北京', value: 4.29 },
+  { name: '上海', value: 5.33 }, { name: '天津', value: 5.81 }
+];
+
+option = {
+  // 透明底色，无缝融入H5背景
+  backgroundColor: 'transparent',
+  
+  title: {
+    text: '全国各省 985 高校录取率阶梯',
+    subtext: '全国平均录取率：1.40%\n数据来源：统计局，教育部，各省教育厅，国金证券研究所',
+    left: 'center',
+    top: '1%',
+    textStyle: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      fontSize: 24,
+      color: '#5c3a21' // 暗褐墨色
+    },
+    subtextStyle: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      fontSize: 14,
+      color: '#8b6b55',
+      lineHeight: 20
+    }
+  },
+
+  // 古风卷轴交互提示框
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'shadow',
+      shadowStyle: { color: 'rgba(238, 230, 203, 0.3)' } // 极淡的宣纸底色阴影
+    },
+    backgroundColor: 'rgba(244, 238, 224, 0.95)',
+    borderColor: '#bca98f',
+    borderWidth: 1,
+    textStyle: {
+      color: '#5c3a21',
+      fontFamily: 'KaiTi, SimSun, serif'
+    },
+    formatter: function(params) {
+      return `<b>${params[0].name}</b> : ${params[0].value}%`;
+    }
+  },
+
+  // 画布边距调整
+  grid: {
+    left: '5%',
+    right: '12%', // 右侧留足空间显示百分比数值
+    bottom: '5%',
+    top: '12%',
+    containLabel: true
+  },
+
+  // X轴（横向数值轴）：隐藏所有线条
+  xAxis: {
+    type: 'value',
+    name: '(录取率 %)',
+    nameTextStyle: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      color: '#8b6b55',
+      align: 'right'
+    },
+    axisLine: { show: false },
+    axisTick: { show: false },
+    splitLine: { show: false }, // 取消网格线，制造留白写意感
+    axisLabel: { show: false }  // 直接在柱子后显示数值，隐藏底部的轴标签让画面更干净
+  },
+
+  // Y轴（省份名称）
+  yAxis: {
+    type: 'category',
+    data: rawData.map(item => item.name),
+    axisLine: { show: false },
+    axisTick: { show: false },
+    axisLabel: {
+      fontFamily: 'KaiTi, SimSun, serif',
+      color: '#5c3a21',
+      fontSize: 13,
+      margin: 15
+    }
+  },
+
+  series: [
+    {
+      name: '985录取率',
+      type: 'bar',
+      barWidth: '55%', // 控制水彩笔触的粗细
+      
+      // 直接在柱子右侧显示百分比
+      label: {
+        show: true,
+        position: 'right',
+        formatter: '{c}%',
+        fontFamily: 'KaiTi, SimSun, serif',
+        color: '#5c3a21',
+        fontSize: 12
+      },
+
+      // 核心：水彩样式与色彩分级
+      itemStyle: {
+        borderRadius: [0, 10, 10, 0], // 右侧圆角，犹如笔锋收尾
+        borderWidth: 0,
+        shadowBlur: 10,
+        shadowOffsetX: 2,
+        shadowOffsetY: 3,
+        // 根据录取率的阶梯，动态分配您提供的色卡颜色
+        color: function(params) {
+          const val = params.value;
+          if (val >= 4.0) {
+            return '#B73F42'; // 胭脂红 (极高录取率，天津/上海/北京)
+          } else if (val >= 2.0) {
+            return '#DC6B62'; // 水红 (较高录取率区间)
+          } else if (val >= 1.62) {
+            return '#DE9960'; // 赭石 (高于全国平均线)
+          } else if (val >= 1.35) {
+            return '#82B29B'; // 石绿 (略低于平均线，竞争激烈)
+          } else {
+            return '#436C85'; // 苍青/莫兰迪蓝 (地狱难度，安徽/河南等)
+          }
+        },
+        // 动态设置对应的阴影颜色
+        shadowColor: function(params) {
+          const val = params.value;
+          if (val >= 4.0) return 'rgba(183, 63, 66, 0.4)';
+          if (val >= 2.0) return 'rgba(220, 107, 98, 0.4)';
+          if (val >= 1.62) return 'rgba(222, 153, 96, 0.4)';
+          if (val >= 1.35) return 'rgba(130, 178, 155, 0.4)';
+          return 'rgba(67, 108, 133, 0.4)';
+        }
+      },
+      
+      data: rawData.map(item => item.value),
+
+      // 绘制全国平均线 (1.40%)
+      markLine: {
+        symbol: ['none', 'none'],
+        label: {
+          show: true,
+          position: 'insideEndTop',
+          formatter: '全国平均线\n1.62%',
+          fontFamily: 'KaiTi, SimSun, serif',
+          color: '#B73F42',
+          fontSize: 13,
+          padding: [0, 0, 10, -50] // 调整文字位置
+        },
+        lineStyle: {
+          color: '#B73F42', // 胭脂红警戒线
+          type: 'dashed',
+          width: 2,
+          opacity: 0.6
+        },
+        data: [
+          { xAxis: 1.40 }
+        ]
+      }
+    }
+  ]
+};
+
+    if (option && typeof option === 'object') {
+      myChart.setOption(option);
+    }
+
+    window.addEventListener('resize', myChart.resize);
+  </script>
+
+</body></html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>清代科举人才地理热力图</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js"></script>
+    <style>
+        /* 预设透明底色，去除默认边距，方便您后续抠图或内嵌 */
+        body { margin: 0; padding: 0; background-color: transparent; }
+        #main { width: 100vw; height: 100vh; min-height: 800px; }
+    </style>
+</head>
+<body>
+
+    <div id="main"></div>
+
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('main'));
+
+        // 数据融合：基于《明清进士题名碑录》及状元榜提取
+        // 注：八旗数据难以落点已作为整体背景说明；东三省映射至辽吉黑；台湾省独立拆出
+        var mapData = [
+            { name: '浙江', value: 2802, zhuangyuan: 20 },
+            { name: '江苏', value: 2697, zhuangyuan: 46 }, 
+            { name: '山东', value: 2276, zhuangyuan: 6 },
+            { name: '江西', value: 1894, zhuangyuan: 3 },
+            { name: '河南', value: 1780, zhuangyuan: 1 },
+            { name: '河北', value: 1525, zhuangyuan: 3 }, 
+            { name: '山西', value: 1433, zhuangyuan: 0 },
+            { name: '福建', value: 1370, zhuangyuan: 3 }, // 原1401减去台湾31
+            { name: '湖北', value: 1233, zhuangyuan: 3 },
+            { name: '安徽', value: 1166, zhuangyuan: 8 },
+            { name: '陕西', value: 1123, zhuangyuan: 1 },
+            { name: '广东', value: 1016, zhuangyuan: 3 },
+            { name: '北京', value: 800, zhuangyuan: 1 }, 
+            { name: '四川', value: 763, zhuangyuan: 1 },
+            { name: '湖南', value: 714, zhuangyuan: 2 },
+            { name: '云南', value: 693, zhuangyuan: 0 },
+            { name: '贵州', value: 601, zhuangyuan: 2 },
+            { name: '广西', value: 567, zhuangyuan: 4 },
+            { name: '天津', value: 270, zhuangyuan: 0 },
+            { name: '甘肃', value: 258, zhuangyuan: 0 },
+            { name: '上海', value: 243, zhuangyuan: 4 },
+            { name: '辽宁', value: 65, zhuangyuan: 0 }, 
+            { name: '吉林', value: 65, zhuangyuan: 2 },
+            { name: '黑龙江', value: 64, zhuangyuan: 0 },
+            { name: '内蒙古', value: 0, zhuangyuan: 1 }, 
+            { name: '台湾', value: 31, zhuangyuan: 0 }, 
+            { name: '海南', value: 0, zhuangyuan: 0 },
+            { name: '新疆', value: 0, zhuangyuan: 0 },
+            { name: '西藏', value: 0, zhuangyuan: 0 },
+            { name: '青海', value: 0, zhuangyuan: 0 },
+            { name: '宁夏', value: 0, zhuangyuan: 0 },
+            { name: '重庆', value: 0, zhuangyuan: 0 } 
+        ];
+
+        var option = {
+            backgroundColor: 'transparent',
+            
+            title: {
+                text: '清代科举人才地理热力图',
+                subtext: '进士与状元人数地理分布（1644-1905）',
+                left: 'center',
+                top: '4%',
+                textStyle: { fontFamily: 'KaiTi, SimSun, serif', fontSize: 26, color: '#5c3a21' },
+                subtextStyle: { fontFamily: 'KaiTi, SimSun, serif', fontSize: 15, color: '#8b6b55' }
+            },
+
+            // 古风宣纸质感交互提示框
+            tooltip: {
+                trigger: 'item',
+                backgroundColor: 'rgba(244, 238, 224, 0.95)',
+                borderColor: '#bca98f',
+                borderWidth: 1,
+                padding: [10, 15],
+                textStyle: { color: '#5c3a21', fontFamily: 'KaiTi, SimSun, serif', fontSize: 16 },
+                formatter: function (params) {
+                    if (params.data) {
+                        return `<b style="font-size:20px;">${params.name}</b><br/><br/>` +
+                               `进士及第：<span style="color:#B73F42;font-weight:bold;">${params.data.value}</span> 人<br/>` +
+                               `状元折桂：<span style="color:#B73F42;font-weight:bold;">${params.data.zhuangyuan}</span> 人`;
+                    } else {
+                        return `<b style="font-size:18px;">${params.name}</b><br/>暂无科考录入数据`;
+                    }
+                }
+            },
+
+            // 视觉映射（热力颜色条），严格应用专属色卡
+            visualMap: {
+                min: 0,
+                max: 3000,
+                left: '5%',
+                bottom: '8%',
+                text: ['科教鼎盛', '寥寥星火'],
+                calculable: true,
+                textStyle: { fontFamily: 'KaiTi, SimSun, serif', color: '#8b6b55', fontSize: 14 },
+                inRange: {
+                    color: [
+                        '#EEE6CB', // 牙黄 (基础底色，人数极少区域)
+                        '#b1d5c9', // 浅水绿
+                        '#82B29B', // 石绿
+                        '#DE9960', // 赭石
+                        '#DC6B62', // 水红
+                        '#B73F42', // 胭脂红
+                        '#436C85'  // 苍青/莫兰迪蓝 (极度鼎盛区域，即江浙)
+                    ]
+                }
+            },
+
+            series: [
+                {
+                    name: '清代科举地理',
+                    type: 'map',
+                    mapType: 'china', 
+                    roam: true, // 允许缩放和平移查看细节
+                    zoom: 1.2,
+                    
+                    // 水彩无边框晕染配置
+                    itemStyle: {
+                        normal: {
+                            // 极细的白色半透明边框，防止颜色重叠时粘连，维持水彩的通透
+                            borderColor: 'rgba(255, 255, 255, 0.5)',
+                            borderWidth: 1,
+                            // 使用极其柔和的暖色阴影营造颜料浮凸感，绝不发黑/发脏
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(222, 153, 96, 0.2)',
+                            shadowOffsetX: 0,
+                            shadowOffsetY: 5
+                        },
+                        emphasis: {
+                            areaColor: '#DE9960', // 鼠标悬浮时变为耀眼的赭石金
+                            borderWidth: 1,
+                            borderColor: '#ffffff',
+                            shadowBlur: 20
+                        }
+                    },
+                    
+                    label: {
+                        normal: { show: false }, // 默认不显示文字，保持水墨留白的干净
+                        emphasis: {
+                            show: true,
+                            color: '#5c3a21',
+                            fontFamily: 'KaiTi, SimSun, serif',
+                            fontWeight: 'bold',
+                            fontSize: 14
+                        }
+                    },
+                    data: mapData
+                }
+            ]
+        };
+
+        myChart.setOption(option);
+
+        // 自适应窗口大小
+        window.addEventListener('resize', function () {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>
