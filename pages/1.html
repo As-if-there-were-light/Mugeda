@@ -1,0 +1,183 @@
+﻿
+
+
+
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+<meta charset="utf-8">
+</head>
+<body style="height: 100%; margin: 0">
+<div id="container" style="height: 100%"></div>
+
+
+<script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+<!-- Uncomment this line if you want to dataTool extension
+<script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/extension/dataTool.min.js"></script>
+-->
+<!-- Uncomment this line if you want to use gl extension
+<script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-gl/dist/echarts-gl.min.js"></script>
+-->
+<!-- Uncomment this line if you want to echarts-stat extension
+<script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-stat/dist/ecStat.min.js"></script>
+-->
+<!-- Uncomment this line if you want to echarts-graph-modularity extension
+<script type="text/javascript" src="https://echarts.apache.org/zh/js/vendors/echarts-graph-modularity/dist/echarts-graph-modularity.min.js"></script>
+-->
+<!-- Uncomment this line if you want to use map
+<script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+-->
+<!-- Uncomment these two lines if you want to use bmap extension
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_API_KEY"></script>
+<script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/extension/bmap.min.js"></script>
+-->
+
+<script type="text/javascript">
+var dom = document.getElementById('container');
+var myChart = echarts.init(dom, null, {
+renderer: 'svg',
+useDirtyRect: false
+});
+var app = {};
+
+var option;
+
+option = {
+// 预设透明背景，方便后期叠加入H5的水彩底图中
+backgroundColor: 'transparent',
+
+// 标题设置：使用古风字体
+title: {
+text: '清代童试总体费用估算',
+subtext: '完整参加一次童试（县试+府试+院试）约需十两白银\n注：图表数值为依史料描述的概数估算',
+left: 'center',
+top: '2%',
+textStyle: {
+fontFamily: 'KaiTi, SimSun, serif',
+fontSize: 22,
+color: '#5c3a21', // 沉稳的暗褐/墨色
+fontWeight: 'normal'
+},
+subtextStyle: {
+fontFamily: 'KaiTi, SimSun, serif',
+fontSize: 14,
+color: '#8b6b55',
+lineHeight: 20
+}
+},
+
+// 提示框：水墨卷轴风格
+tooltip: {
+trigger: 'axis',
+axisPointer: {
+type: 'shadow',
+shadowStyle: {
+color: 'rgba(238, 230, 203, 0.3)' // 极浅的宣纸底色阴影
+}
+},
+backgroundColor: 'rgba(244, 238, 224, 0.9)',
+borderColor: '#bca98f',
+borderWidth: 1,
+textStyle: {
+color: '#5c3a21',
+fontFamily: 'KaiTi, SimSun, serif'
+},
+formatter: '{b} : 约 {c} 两白银'
+},
+
+// 画布边距调整
+grid: {
+left: '5%',
+right: '10%', // 右侧留出空间显示数字标签
+bottom: '5%',
+top: '20%',
+containLabel: true
+},
+
+// X轴（横轴，代表金额）：隐藏各种刻度线，保持页面干净
+xAxis: {
+type: 'value',
+name: '(两白银)',
+nameTextStyle: {
+fontFamily: 'KaiTi, SimSun, serif',
+color: '#8b6b55',
+align: 'right'
+},
+splitLine: { show: false }, // 隐藏网格线，增强水彩画的留白感
+axisLine: { show: false },
+axisTick: { show: false },
+axisLabel: {
+fontFamily: 'KaiTi, SimSun, serif',
+color: '#8b6b55'
+}
+},
+
+// Y轴（纵轴，代表费用项目）：去除线条，只保留文字
+yAxis: {
+type: 'category',
+// 按照从少到多的顺序排列，图表视觉上会呈现出稳重的阶梯状
+data: ['试卷费', '交通费 (一般地区)', '其他杂费', '住宿饮食费', '担保费'],
+axisLine: { show: false },
+axisTick: { show: false },
+axisLabel: {
+fontFamily: 'KaiTi, SimSun, serif',
+color: '#5c3a21',
+fontSize: 14
+}
+},
+
+// 核心数据与图形配置
+series: [
+{
+name: '费用估算',
+type: 'bar',
+barWidth: '40%', // 控制柱子粗细
+
+// 为每一根柱子分配你指定的“新中式”颜色
+itemStyle: {
+borderRadius: [0, 10, 10, 0], // 横向柱状图，只让右边呈现圆角
+borderWidth: 0,
+shadowBlur: 15, // 水彩边缘晕染效果
+shadowColor: 'rgba(0, 0, 0, 0.15)',
+shadowOffsetX: 2,
+shadowOffsetY: 3,
+// 根据数据索引动态分配颜色
+color: function(params) {
+// 你提供的色卡：提取了适合做渐变对比的5种颜色
+var colorList = [
+'#b1d5c9', // 浅水绿 (试卷费)
+'#82B29B', // 石绿 (交通费)
+'#EEE6CB', // 牙黄 (其他杂费)
+'#DE9960', // 赭石 (住宿饮食)
+'#B73F42' // 胭脂红 (担保费)
+];
+return colorList[params.dataIndex];
+}
+},
+
+// 在柱子右侧显示具体数字
+label: {
+show: true,
+position: 'right',
+formatter: '{c} 两',
+fontFamily: 'KaiTi, SimSun, serif',
+color: '#5c3a21',
+fontSize: 14
+},
+
+// 数据：依据原图描述合理估算 (不到一两->0.8, 约一两->1, 一定数额->1.2, 约三两->3, 几两->4)
+// 总和约为 10 两，符合史料
+data: [0.8, 1, 1.2, 3, 4]
+}
+]
+};
+
+if (option && typeof option === 'object') {
+myChart.setOption(option);
+}
+
+window.addEventListener('resize', myChart.resize);
+</script>
+</body>
+</html>
