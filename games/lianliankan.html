@@ -94,8 +94,8 @@
             z-index: 10;
         }
 
-        .left-col { align-items: flex-start; margin-left: 15px;}
-        .right-col { align-items: flex-end; margin-right: 15px;}
+        .left-col { margin-left: 15px;}
+        .right-col { margin-right: 15px;}
 
         /* 卡片通用样式 */
         .card {
@@ -426,6 +426,7 @@
         drawLines();
     }
 
+    // ====== 修改后的提交函数 ======
     function submitAnswers() {
         if (lines.length < 5) {
             alert("请先完成所有（5道）诗句的连线，再提交答卷哦！");
@@ -436,9 +437,25 @@
         const finalScore = correctCount * 20;
 
         const resultImg = document.getElementById('result-img');
-        resultImg.src = "./" + finalScore + ".png"; 
+        const overlay = document.getElementById('result-overlay');
 
-        document.getElementById('result-overlay').style.display = 'flex';
+        // 先隐藏图片，防止由于网络慢闪现上一局的旧海报
+        resultImg.style.display = 'none'; 
+
+        // 监听：等 GitHub 服务器把图片完全下载好了，再执行弹窗动作
+        resultImg.onload = function() {
+            resultImg.style.display = 'block'; 
+            overlay.style.display = 'flex';    
+        };
+
+        // 如果路径不对或404，这里会直接弹窗抓个现行，并指出到底错在请求哪个网址
+        resultImg.onerror = function() {
+            alert("海报图片加载失败！\n请检查图片是否成功上传至仓库。\n当前请求的绝对路径为：\n" + resultImg.src);
+            overlay.style.display = 'flex'; // 即使失败也让弹窗出来，防止界面卡死
+        };
+
+        // 使用明确的相对路径规范
+        resultImg.src = "./" + finalScore + ".png"; 
     }
 
     function restartGame() {
