@@ -13,7 +13,6 @@
         }
 
         body {
-            /* body提供一个基础深色背景，以便在浏览器中直接打开时能看清白色文字 */
             background-color: #2c2825; 
             display: flex;
             justify-content: center;
@@ -25,7 +24,7 @@
         #game-container {
             width: 640px;
             height: 1252px;
-            background-color: transparent; /* 按要求设置为透明 */
+            background-color: transparent; 
             position: relative;
             overflow: hidden;
             display: flex;
@@ -288,14 +287,7 @@
 </div>
 
 <script>
-    // 题目答案映射配置 (左侧索引 -> 右侧索引)
-    const correctMap = {
-        0: 3, 
-        1: 2, 
-        2: 4, 
-        3: 1, 
-        4: 0  
-    };
+    const correctMap = { 0: 3, 1: 2, 2: 4, 3: 1, 4: 0 };
 
     const container = document.getElementById('game-container');
     const canvas = document.getElementById('line-canvas');
@@ -309,8 +301,6 @@
     let isDrawing = false;
     let currentLine = null;
     const SNAP_DISTANCE = 60; 
-
-    // 统一连线颜色，避免边连边透题
     const LINE_COLOR = '#e6b36a';
 
     function getDotCenter(cardEl) {
@@ -325,6 +315,7 @@
 
     function resizeCanvas() {
         const board = document.querySelector('.board');
+        if (!board || board.clientWidth === 0) return;
         canvas.width = board.clientWidth;
         canvas.height = board.clientHeight;
         drawLines();
@@ -332,13 +323,9 @@
     
     function drawLines() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // 绘制已固定的线
         lines.forEach(line => {
             drawLine(line.startX, line.startY, line.endX, line.endY, LINE_COLOR);
         });
-
-        // 绘制正在拖拽的线
         if (isDrawing && currentLine) {
             drawLine(currentLine.startX, currentLine.startY, currentLine.endX, currentLine.endY, LINE_COLOR);
         }
@@ -409,7 +396,6 @@
             const dist = Math.hypot(currentLine.endX - targetPos.x, currentLine.endY - targetPos.y);
             
             if (dist < SNAP_DISTANCE) {
-                // 如果目标点已被连接，覆盖旧线
                 lines = lines.filter(l => currentLine.isStartingFromLeft ? l.rightIndex !== i : l.leftIndex !== i);
 
                 currentLine.endX = targetPos.x;
@@ -421,10 +407,8 @@
                     currentLine.leftIndex = i;
                 }
                 
-                // 校验这根线是否正确并记录状态
                 currentLine.isCorrect = (correctMap[currentLine.leftIndex] === currentLine.rightIndex);
                 
-                // 规范化坐标（始终从左画到右）
                 const leftPos = getDotCenter(leftCards[currentLine.leftIndex]);
                 const rightPos = getDotCenter(rightCards[currentLine.rightIndex]);
                 currentLine.startX = leftPos.x;
@@ -442,27 +426,21 @@
         drawLines();
     }
 
-    // 提交并计算最终得分
     function submitAnswers() {
         if (lines.length < 5) {
             alert("请先完成所有（5道）诗句的连线，再提交答卷哦！");
             return;
         }
 
-        // 计算正确的题目数量
         const correctCount = lines.filter(l => l.isCorrect).length;
-        // 每题 20 分，总分 100 分
         const finalScore = correctCount * 20;
 
-        // 根据得分切换图片路径展示对应的海报 (例如：20分.png)
         const resultImg = document.getElementById('result-img');
         resultImg.src = finalScore + ".png"; 
 
-        // 显示结果层
         document.getElementById('result-overlay').style.display = 'flex';
     }
 
-    // 重新挑战
     function restartGame() {
         lines = [];
         updateScoreBoard();
@@ -470,28 +448,41 @@
         document.getElementById('result-overlay').style.display = 'none';
     }
 
-    // 事件监听绑定
-    leftCards.forEach((card, index) => {
-        const dot = card.querySelector('.dot');
-        dot.addEventListener('mousedown', (e) => handleStart(e, index, true));
-        dot.addEventListener('touchstart', (e) => handleStart(e, index, true), {passive: false});
-    });
+    // 安全绑定事件函数
+    function initGame() {
+        leftCards.forEach((card, index) => {
+            const dot = card.querySelector('.dot');
+            if(dot) {
+                dot.addEventListener('mousedown', (e) => handleStart(e, index, true));
+                dot.addEventListener('touchstart', (e) => handleStart(e, index, true), {passive: false});
+            }
+        });
 
-    rightCards.forEach((card, index) => {
-        const dot = card.querySelector('.dot');
-        dot.addEventListener('mousedown', (e) => handleStart(e, index, false));
-        dot.addEventListener('touchstart', (e) => handleStart(e, index, false), {passive: false});
-    });
+        rightCards.forEach((card, index) => {
+            const dot = card.querySelector('.dot');
+            if(dot) {
+                dot.addEventListener('mousedown', (e) => handleStart(e, index, false));
+                dot.addEventListener('touchstart', (e) => handleStart(e, index, false), {passive: false});
+            }
+        });
 
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('touchmove', handleMove, {passive: false});
-    document.addEventListener('mouseup', handleEnd);
-    document.addEventListener('touchend', handleEnd);
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('touchmove', handleMove, {passive: false});
+        document.addEventListener('mouseup', handleEnd);
+        document.addEventListener('touchend', handleEnd);
 
-    // 初始化画布与窗口缩放适配
-    window.onload = resizeCanvas;
-    window.onresize = resizeCanvas;
+        // 延迟执行确保 DOM 完全撑开
+        setTimeout(resizeCanvas, 100);
+    }
 
+    // 确保线上环境 DOM 树完全就绪后再执行逻辑
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGame);
+    } else {
+        initGame();
+    }
+
+    window.addEventListener('resize', resizeCanvas);
 </script>
 </body>
 </html>
