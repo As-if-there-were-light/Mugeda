@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科举诗句连连看</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none; /* 防止拖拽时选中文本 */
+        }
+
+        body {
+            /* body提供一个基础深色背景，以便在浏览器中直接打开时能看清白色文字 */
+            background-color: #2c2825; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: "KaiTi", "楷体", serif;
+        }
+
+        #game-container {
+            width: 640px;
+            height: 1252px;
+            background-color: transparent; /* 按要求设置为透明 */
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* 顶部标题与计分区 */
+        .header {
+            text-align: center;
+            color: #fff;
+            padding: 40px 20px 10px;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 15px;
+            letter-spacing: 5px;
+            color: #e6b36a;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .header h3 {
+            font-size: 20px;
+            font-weight: normal;
+            margin-bottom: 25px;
+            color: #eee;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 30px;
+            border-radius: 10px;
+            width: fit-content;
+            margin: 0 auto;
+            border: 1px solid #e6b36a;
+        }
+        
+        .score-val {
+            color: #e6b36a;
+            font-weight: bold;
+            font-size: 28px;
+            margin: 0 5px;
+        }
+
+        /* 游戏主体区域 */
+        .board {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 10px 20px;
+            position: relative;
+        }
+
+        /* 左右列容器 */
+        .column {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            z-index: 10;
+        }
+
+        .left-col { align-items: flex-start; margin-left: 15px;}
+        .right-col { align-items: flex-end; margin-right: 15px;}
+
+        /* 卡片通用样式 */
+        .card {
+            position: relative;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+        }
+
+        /* 左侧诗句卡片样式 */
+        .card-left {
+            width: 260px;
+            min-height: 120px;
+            background-color: #f5eedc;
+            border: 2px solid #b37e62;
+            padding: 15px;
+            font-size: 20px;
+            line-height: 1.6;
+            color: #1a1a1a;
+            font-weight: bold;
+            border-style: double;
+            border-width: 6px;
+        }
+
+        /* 右侧情绪卡片样式 */
+        .card-right {
+            width: 220px;
+            height: 70px;
+            background: linear-gradient(to right, #9c3c1e, #b84b29);
+            border: 4px solid #4a7c59;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* 连接点 (锚点) */
+        .dot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #e6b36a;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.8);
+            z-index: 20;
+            transition: transform 0.2s;
+        }
+        
+        .dot:hover {
+            transform: scale(1.3);
+            background-color: #ffeb3b;
+        }
+
+        .left-col .dot { right: -25px; top: 50%; transform: translateY(-50%); }
+        .right-col .dot { left: -25px; top: 50%; transform: translateY(-50%); }
+
+        /* 画布 */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* 底部提交按钮区 */
+        .footer {
+            text-align: center;
+            padding: 20px 0 40px;
+            z-index: 10;
+        }
+
+        #submit-btn {
+            background: linear-gradient(to bottom, #e6b36a, #c79043);
+            color: #333;
+            border: none;
+            padding: 12px 40px;
+            font-size: 24px;
+            font-family: "KaiTi", "楷体", serif;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+        }
+
+        #submit-btn:hover {
+            transform: scale(1.05);
+            color: #000;
+        }
+
+        #submit-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 结果海报遮罩层 */
+        #result-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            z-index: 999;
+            display: none; /* 默认隐藏 */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #result-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 保证海报填满容器 */
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        #restart-btn {
+            position: absolute;
+            bottom: 60px;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.9);
+            color: #9c3c1e;
+            border: 2px solid #9c3c1e;
+            padding: 10px 30px;
+            font-size: 22px;
+            font-family: "KaiTi", "楷体", serif;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            transition: background 0.3s;
+        }
+
+        #restart-btn:hover {
+            background: #fff;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="header">
+        <h1>连连看</h1>
+        <h3>请将古代考生科举主题诗句与对应情绪连线</h3>
+        <div class="scoreboard">
+            <div>当前已连接: <span id="conn-count" class="score-val">0</span> / 5 题</div>
+        </div>
+    </div>
+
+    <div class="board">
+        <canvas id="line-canvas"></canvas>
+        
+        <div class="column left-col" id="left-col">
+            <div class="card card-left" data-index="0">万人被黜落，道路涕纷纷。旋里无颜色，志士死不存。<div class="dot"></div></div>
+            <div class="card card-left" data-index="1">得意疾书，回头大错，此况何如！觉千瓢冷汗沾衣，一缕魂飞出舍，痛痒全无。<div class="dot"></div></div>
+            <div class="card card-left" data-index="2">十有九人堪白眼，百无一用是书生。<div class="dot"></div></div>
+            <div class="card card-left" data-index="3">羡君占尽科名荣，一日声华漫天地。<div class="dot"></div></div>
+            <div class="card card-left" data-index="4">落拓名场五十秋，不成一事雪盈头。<div class="dot"></div></div>
+        </div>
+
+        <div class="column right-col" id="right-col">
+            <div class="card card-right" data-index="0">未中举的失落<div class="dot"></div></div>
+            <div class="card card-right" data-index="1">中举的喜悦<div class="dot"></div></div>
+            <div class="card card-right" data-index="2">考场内的紧张<div class="dot"></div></div>
+            <div class="card card-right" data-index="3">未中举的愤懑<div class="dot"></div></div>
+            <div class="card card-right" data-index="4">对科举的焦虑<div class="dot"></div></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button id="submit-btn" onclick="submitAnswers()">提交答卷</button>
+    </div>
+
+    <div id="result-overlay">
+        <img id="result-img" src="" alt="得分海报">
+        <button id="restart-btn" onclick="restartGame()">重新挑战</button>
+    </div>
+</div>
+
+<script>
+    // 题目答案映射配置 (左侧索引 -> 右侧索引)
+    const correctMap = {
+        0: 3, 
+        1: 2, 
+        2: 4, 
+        3: 1, 
+        4: 0  
+    };
+
+    const container = document.getElementById('game-container');
+    const canvas = document.getElementById('line-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    const leftCards = document.querySelectorAll('.left-col .card');
+    const rightCards = document.querySelectorAll('.right-col .card');
+    const connCountEl = document.getElementById('conn-count');
+
+    let lines = []; 
+    let isDrawing = false;
+    let currentLine = null;
+    const SNAP_DISTANCE = 60; 
+
+    // 统一连线颜色，避免边连边透题
+    const LINE_COLOR = '#e6b36a';
+
+    function getDotCenter(cardEl) {
+        const dot = cardEl.querySelector('.dot');
+        const dotRect = dot.getBoundingClientRect();
+        const canvasRect = canvas.getBoundingClientRect();
+        return {
+            x: dotRect.left - canvasRect.left + dotRect.width / 2,
+            y: dotRect.top - canvasRect.top + dotRect.height / 2
+        };
+    }
+
+    function resizeCanvas() {
+        const board = document.querySelector('.board');
+        canvas.width = board.clientWidth;
+        canvas.height = board.clientHeight;
+        drawLines();
+    }
+    
+    function drawLines() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 绘制已固定的线
+        lines.forEach(line => {
+            drawLine(line.startX, line.startY, line.endX, line.endY, LINE_COLOR);
+        });
+
+        // 绘制正在拖拽的线
+        if (isDrawing && currentLine) {
+            drawLine(currentLine.startX, currentLine.startY, currentLine.endX, currentLine.endY, LINE_COLOR);
+        }
+    }
+
+    function drawLine(x1, y1, x2, y2, color) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.arc(x1, y1, 6, 0, Math.PI * 2);
+        ctx.arc(x2, y2, 6, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function updateScoreBoard() {
+        connCountEl.innerText = lines.length;
+    }
+
+    function handleStart(e, index, isLeft) {
+        lines = lines.filter(l => isLeft ? l.leftIndex !== index : l.rightIndex !== index);
+        updateScoreBoard();
+
+        const card = isLeft ? leftCards[index] : rightCards[index];
+        const startPos = getDotCenter(card);
+        
+        isDrawing = true;
+        currentLine = {
+            startX: startPos.x,
+            startY: startPos.y,
+            endX: startPos.x,
+            endY: startPos.y,
+            leftIndex: isLeft ? index : null,
+            rightIndex: !isLeft ? index : null,
+            isStartingFromLeft: isLeft
+        };
+        drawLines();
+    }
+
+    function handleMove(e) {
+        if (!isDrawing) return;
+        e.preventDefault(); 
+        
+        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        const canvasRect = canvas.getBoundingClientRect();
+        currentLine.endX = clientX - canvasRect.left;
+        currentLine.endY = clientY - canvasRect.top;
+        
+        drawLines();
+    }
+
+    function handleEnd(e) {
+        if (!isDrawing) return;
+        isDrawing = false;
+
+        let targetCards = currentLine.isStartingFromLeft ? rightCards : leftCards;
+
+        for (let i = 0; i < targetCards.length; i++) {
+            const targetPos = getDotCenter(targetCards[i]);
+            const dist = Math.hypot(currentLine.endX - targetPos.x, currentLine.endY - targetPos.y);
+            
+            if (dist < SNAP_DISTANCE) {
+                // 如果目标点已被连接，覆盖旧线
+                lines = lines.filter(l => currentLine.isStartingFromLeft ? l.rightIndex !== i : l.leftIndex !== i);
+
+                currentLine.endX = targetPos.x;
+                currentLine.endY = targetPos.y;
+                
+                if (currentLine.isStartingFromLeft) {
+                    currentLine.rightIndex = i;
+                } else {
+                    currentLine.leftIndex = i;
+                }
+                
+                // 校验这根线是否正确并记录状态
+                currentLine.isCorrect = (correctMap[currentLine.leftIndex] === currentLine.rightIndex);
+                
+                // 规范化坐标（始终从左画到右）
+                const leftPos = getDotCenter(leftCards[currentLine.leftIndex]);
+                const rightPos = getDotCenter(rightCards[currentLine.rightIndex]);
+                currentLine.startX = leftPos.x;
+                currentLine.startY = leftPos.y;
+                currentLine.endX = rightPos.x;
+                currentLine.endY = rightPos.y;
+
+                lines.push({...currentLine});
+                break;
+            }
+        }
+
+        currentLine = null;
+        updateScoreBoard();
+        drawLines();
+    }
+
+    // 提交并计算最终得分
+    function submitAnswers() {
+        if (lines.length < 5) {
+            alert("请先完成所有（5道）诗句的连线，再提交答卷哦！");
+            return;
+        }
+
+        // 计算正确的题目数量
+        const correctCount = lines.filter(l => l.isCorrect).length;
+        // 每题 20 分，总分 100 分
+        const finalScore = correctCount * 20;
+
+        // 根据得分切换图片路径展示对应的海报 (例如：20分.png)
+        const resultImg = document.getElementById('result-img');
+        resultImg.src = finalScore + "分.png"; 
+
+        // 显示结果层
+        document.getElementById('result-overlay').style.display = 'flex';
+    }
+
+    // 重新挑战
+    function restartGame() {
+        lines = [];
+        updateScoreBoard();
+        drawLines();
+        document.getElementById('result-overlay').style.display = 'none';
+    }
+
+    // 事件监听绑定
+    leftCards.forEach((card, index) => {
+        const dot = card.querySelector('.dot');
+        dot.addEventListener('mousedown', (e) => handleStart(e, index, true));
+        dot.addEventListener('touchstart', (e) => handleStart(e, index, true), {passive: false});
+    });
+
+    rightCards.forEach((card, index) => {
+        const dot = card.querySelector('.dot');
+        dot.addEventListener('mousedown', (e) => handleStart(e, index, false));
+        dot.addEventListener('touchstart', (e) => handleStart(e, index, false), {passive: false});
+    });
+
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('touchmove', handleMove, {passive: false});
+    document.addEventListener('mouseup', handleEnd);
+    document.addEventListener('touchend', handleEnd);
+
+    // 初始化画布与窗口缩放适配
+    window.onload = resizeCanvas;
+    window.onresize = resizeCanvas;
+
+</script>
+</body>
+</html>
