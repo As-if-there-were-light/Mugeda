@@ -9,27 +9,30 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none; /* 防止拖拽时选中文本 */
+            user-select: none;
         }
 
         body {
-            background-color: #2c2825; 
+            background-color: #2c2825; /* 给body一个深色底，如果您嵌入到其他页面，这个属性可能被覆盖 */
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* 【修复重点】改为顶部对齐，防止高度溢出时无法向上滚动 */
+            padding: 40px 0; /* 顶部留出安全距离 */
             min-height: 100vh;
             font-family: "KaiTi", "楷体", serif;
+            overflow-x: hidden;
         }
 
         #game-container {
             width: 640px;
             height: 1252px;
-            background-color: transparent; 
+            background-color: transparent; /* 您要求的透明底色 */
             position: relative;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            /* 增加轻微的内发光/背景模糊，确保在复杂背景下文字依然可读 */
+            box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 50px rgba(0,0,0,0.2);
+            border-radius: 10px;
         }
 
         /* 顶部标题与计分区 */
@@ -45,7 +48,7 @@
             margin-bottom: 15px;
             letter-spacing: 5px;
             color: #e6b36a;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.9); /* 加深阴影确保在透明底色下可见 */
         }
 
         .header h3 {
@@ -53,7 +56,7 @@
             font-weight: normal;
             margin-bottom: 25px;
             color: #eee;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
         }
 
         .scoreboard {
@@ -61,7 +64,7 @@
             justify-content: center;
             font-size: 24px;
             color: #fff;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.6);
             padding: 10px 30px;
             border-radius: 10px;
             width: fit-content;
@@ -83,6 +86,8 @@
             justify-content: space-between;
             padding: 10px 10px 20px;
             position: relative;
+            /* 确保内部 canvas 尺寸正常撑开 */
+            min-height: 800px; 
         }
 
         /* 左右列容器 */
@@ -94,8 +99,8 @@
             z-index: 10;
         }
 
-        .left-col { margin-left: 15px;}
-        .right-col { margin-right: 15px;}
+        .left-col { align-items: flex-start; margin-left: 15px;}
+        .right-col { align-items: flex-end; margin-right: 15px;}
 
         /* 卡片通用样式 */
         .card {
@@ -104,7 +109,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.6);
         }
 
         /* 左侧诗句卡片样式 */
@@ -132,6 +137,7 @@
             font-size: 24px;
             font-weight: bold;
             letter-spacing: 2px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         /* 连接点 (锚点) */
@@ -170,16 +176,16 @@
         /* 底部提交按钮区 */
         .footer {
             text-align: center;
-            padding: 20px 0 40px;
+            padding: 20px 0 60px;
             z-index: 10;
         }
 
         #submit-btn {
             background: linear-gradient(to bottom, #e6b36a, #c79043);
-            color: #333;
+            color: #2c2825;
             border: none;
-            padding: 12px 40px;
-            font-size: 24px;
+            padding: 15px 50px;
+            font-size: 26px;
             font-family: "KaiTi", "楷体", serif;
             font-weight: bold;
             border-radius: 30px;
@@ -206,7 +212,7 @@
             height: 100%;
             background-color: rgba(0,0,0,0.85);
             z-index: 999;
-            display: none; /* 默认隐藏 */
+            display: none; 
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -215,7 +221,7 @@
         #result-img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 保证海报填满容器 */
+            object-fit: cover; 
             position: absolute;
             top: 0;
             left: 0;
@@ -224,18 +230,18 @@
 
         #restart-btn {
             position: absolute;
-            bottom: 60px;
+            bottom: 80px;
             z-index: 1001;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             color: #9c3c1e;
             border: 2px solid #9c3c1e;
-            padding: 10px 30px;
-            font-size: 22px;
+            padding: 12px 40px;
+            font-size: 24px;
             font-family: "KaiTi", "楷体", serif;
             font-weight: bold;
-            border-radius: 25px;
+            border-radius: 30px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             transition: background 0.3s;
         }
 
@@ -287,7 +293,13 @@
 </div>
 
 <script>
-    const correctMap = { 0: 3, 1: 2, 2: 4, 3: 1, 4: 0 };
+    const correctMap = {
+        0: 3, 
+        1: 2, 
+        2: 4, 
+        3: 1, 
+        4: 0  
+    };
 
     const container = document.getElementById('game-container');
     const canvas = document.getElementById('line-canvas');
@@ -315,7 +327,7 @@
 
     function resizeCanvas() {
         const board = document.querySelector('.board');
-        if (!board || board.clientWidth === 0) return;
+        if(board.clientWidth === 0) return; // 避免隐藏状态下获取宽度为0
         canvas.width = board.clientWidth;
         canvas.height = board.clientHeight;
         drawLines();
@@ -323,9 +335,11 @@
     
     function drawLines() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
         lines.forEach(line => {
             drawLine(line.startX, line.startY, line.endX, line.endY, LINE_COLOR);
         });
+
         if (isDrawing && currentLine) {
             drawLine(currentLine.startX, currentLine.startY, currentLine.endX, currentLine.endY, LINE_COLOR);
         }
@@ -426,7 +440,6 @@
         drawLines();
     }
 
-    // ====== 修改后的提交函数 ======
     function submitAnswers() {
         if (lines.length < 5) {
             alert("请先完成所有（5道）诗句的连线，再提交答卷哦！");
@@ -437,25 +450,10 @@
         const finalScore = correctCount * 20;
 
         const resultImg = document.getElementById('result-img');
-        const overlay = document.getElementById('result-overlay');
+        // 根据环境可能存在中文路径解析问题，如果图片加载不出来，请将图片重命名为英文如 score_100.png 并修改此处
+        resultImg.src = finalScore + ".png"; 
 
-        // 先隐藏图片，防止由于网络慢闪现上一局的旧海报
-        resultImg.style.display = 'none'; 
-
-        // 监听：等 GitHub 服务器把图片完全下载好了，再执行弹窗动作
-        resultImg.onload = function() {
-            resultImg.style.display = 'block'; 
-            overlay.style.display = 'flex';    
-        };
-
-        // 如果路径不对或404，这里会直接弹窗抓个现行，并指出到底错在请求哪个网址
-        resultImg.onerror = function() {
-            alert("海报图片加载失败！\n请检查图片是否成功上传至仓库。\n当前请求的绝对路径为：\n" + resultImg.src);
-            overlay.style.display = 'flex'; // 即使失败也让弹窗出来，防止界面卡死
-        };
-
-        // 使用明确的相对路径规范
-        resultImg.src = "./" + finalScore + ".png"; 
+        document.getElementById('result-overlay').style.display = 'flex';
     }
 
     function restartGame() {
@@ -465,41 +463,28 @@
         document.getElementById('result-overlay').style.display = 'none';
     }
 
-    // 安全绑定事件函数
-    function initGame() {
-        leftCards.forEach((card, index) => {
-            const dot = card.querySelector('.dot');
-            if(dot) {
-                dot.addEventListener('mousedown', (e) => handleStart(e, index, true));
-                dot.addEventListener('touchstart', (e) => handleStart(e, index, true), {passive: false});
-            }
-        });
+    leftCards.forEach((card, index) => {
+        const dot = card.querySelector('.dot');
+        dot.addEventListener('mousedown', (e) => handleStart(e, index, true));
+        dot.addEventListener('touchstart', (e) => handleStart(e, index, true), {passive: false});
+    });
 
-        rightCards.forEach((card, index) => {
-            const dot = card.querySelector('.dot');
-            if(dot) {
-                dot.addEventListener('mousedown', (e) => handleStart(e, index, false));
-                dot.addEventListener('touchstart', (e) => handleStart(e, index, false), {passive: false});
-            }
-        });
+    rightCards.forEach((card, index) => {
+        const dot = card.querySelector('.dot');
+        dot.addEventListener('mousedown', (e) => handleStart(e, index, false));
+        dot.addEventListener('touchstart', (e) => handleStart(e, index, false), {passive: false});
+    });
 
-        document.addEventListener('mousemove', handleMove);
-        document.addEventListener('touchmove', handleMove, {passive: false});
-        document.addEventListener('mouseup', handleEnd);
-        document.addEventListener('touchend', handleEnd);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('touchmove', handleMove, {passive: false});
+    document.addEventListener('mouseup', handleEnd);
+    document.addEventListener('touchend', handleEnd);
 
-        // 延迟执行确保 DOM 完全撑开
-        setTimeout(resizeCanvas, 100);
-    }
-
-    // 确保线上环境 DOM 树完全就绪后再执行逻辑
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initGame);
-    } else {
-        initGame();
-    }
-
+    // 【修复重点】多重保障画板初始化
+    setTimeout(resizeCanvas, 50); 
+    window.addEventListener('load', resizeCanvas);
     window.addEventListener('resize', resizeCanvas);
+
 </script>
 </body>
 </html>
