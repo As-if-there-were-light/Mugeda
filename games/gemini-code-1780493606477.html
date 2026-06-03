@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考试抽签交互</title>
+    <style>
+        /* 页面基础样式 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 设定指定的纯米白色背景 */
+            background-color: #eee9df;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        /* 主容器 */
+        .container {
+            position: relative;
+            /* 修改页面比例为 640*1252 */
+            width: 640px;
+            height: 1252px;
+            /* 配合最大宽高和 aspect-ratio，确保在较小屏幕上等比例缩放完美适配 */
+            max-width: 100%;
+            max-height: 100%;
+            aspect-ratio: 640 / 1252;
+        }
+
+        /* 抽签桶 (图1的主体部分) */
+        .stick-can {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 250px;
+            cursor: pointer;
+            z-index: 2;
+            transition: transform 0.1s ease;
+        }
+
+        /* 抽签桶摇晃动画类 */
+        .shake-animation {
+            animation: shake 1.5s ease-in-out forwards;
+        }
+
+        /* 按钮样式 (从图1中提取) */
+        .draw-btn {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 25px;
+            font-size: 18px;
+            color: white;
+            background-color: #c0392b; /* 提取图1中红色边框和背景的颜色 */
+            border: 2px solid white;
+            border-radius: 12px;
+            cursor: pointer;
+            z-index: 10;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
+
+        .draw-btn:hover {
+            background-color: #e74c3c;
+        }
+
+        .draw-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* 抽签结果牌容器 (用于3D视角) */
+        .lottery-card-container {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.1); /* 初始极小，隐藏在桶后 */
+            width: 200px; /* 根据结果图比例调整 */
+            height: 350px;
+            perspective: 1000px; /* 开启3D透视 */
+            z-index: 1; /* 初始在桶下面 */
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out, z-index 0s linear 0.5s; /* z-index 延迟，在完全显示后移到上面 */
+        }
+
+        /* 显示结果牌时的样式 */
+        .lottery-card-container.show {
+            transform: translateX(-50%) scale(1) translateY(-20px); /* 滑出并放大 */
+            opacity: 1;
+            z-index: 5; /* 移到桶上面 */
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out, z-index 0s linear; /* 移除 z-index 延迟 */
+        }
+
+        /* 3D 翻转的卡片主体 */
+        .lottery-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* 增加翻转的趣味性 */
+        }
+
+        /* 翻转状态 */
+        .lottery-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* 卡片的正反两面 */
+        .card-front, .card-back {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            backface-visibility: hidden; /* 隐藏背面，防止翻转时透视 */
+            background-position: center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            border-radius: 8px; /* 可选：给牌子加一点圆角 */
+        }
+
+        /* 正面: 上上签 (图2) */
+        .card-front {
+            background-image: url('image_1.png');
+        }
+
+        /* 背面: 随机结果 (图3-6) */
+        .card-back {
+            transform: rotateY(180deg); /* 初始翻转到背面 */
+            background-image: none; /* 初始不加载图片，由JS随机设置 */
+        }
+
+        /* 摇晃动画定义 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(-50%) rotate(0deg); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-50%) translateY(-5px) rotate(-5deg); }
+            20%, 40%, 60%, 80% { transform: translateX(-50%) translateY(5px) rotate(5deg); }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="image_0.png" alt="抽签桶" class="stick-can" id="stickCan">
+
+        <div class="lottery-card-container" id="cardContainer">
+            <div class="lottery-card" id="lotteryCard">
+                <div class="card-front"></div>
+                <div class="card-back" id="cardBack"></div>
+            </div>
+        </div>
+
+        <button class="draw-btn" id="drawBtn">点击抽取你的考试签</button>
+    </div>
+
+    <script>
+        const stickCan = document.getElementById('stickCan');
+        const drawBtn = document.getElementById('drawBtn');
+        const cardContainer = document.getElementById('cardContainer');
+        const lotteryCard = document.getElementById('lotteryCard');
+        const cardBack = document.getElementById('cardBack');
+
+        // 随机结果图片列表 (共 5 张结果图，对应原图3至图7中的前5张，已完全剔除第7号相关部分)
+        const results = [
+            'image_2.png', // 逢考必过
+            'image_3.png', // 心想事成
+            'image_4.png', // 锦鲤附体
+            'image_5.png', // 金榜题名
+            'image_6.png'  // 超常发挥
+        ];
+
+        let canDraw = true;
+
+        drawBtn.addEventListener('click', () => {
+            if (!canDraw) return;
+            canDraw = false;
+            drawBtn.disabled = true;
+            drawBtn.innerText = '正在抽签...';
+
+            // 1. 重置所有状态
+            cardContainer.classList.remove('show');
+            lotteryCard.classList.remove('flipped');
+            cardBack.style.backgroundImage = 'none';
+
+            // 2. 桶摇晃
+            stickCan.classList.add('shake-animation');
+
+            // 3. 在桶摇晃接近尾声时滑出“上上签”
+            setTimeout(() => {
+                cardContainer.classList.add('show');
+            }, 1000); // 1.0秒后开始滑出
+
+            // 4. 桶停止摇晃
+            setTimeout(() => {
+                stickCan.classList.remove('shake-animation');
+            }, 1500); // 1.5秒后停止摇晃
+
+            // 5. 在“上上签”完全显示一段时间后自动翻转
+            setTimeout(() => {
+                // 5a. 随机选择结果图片并设置到背面
+                const randomIndex = Math.floor(Math.random() * results.length);
+                const selectedResult = results[randomIndex];
+                cardBack.style.backgroundImage = `url('${selectedResult}')`;
+
+                // 5b. 触发翻转
+                lotteryCard.classList.add('flipped');
+
+                // 6. 翻转完成一定时间后，允许再次抽签
+                setTimeout(() => {
+                    drawBtn.innerText = '再次抽取';
+                    drawBtn.disabled = false;
+                    canDraw = true;
+                }, 1500); // 翻转完成后等待1.5秒
+
+            }, 2500); // “上上签”滑出后等待1秒开始翻转 (1000ms滑出 + 1000ms显示 + 500ms缓冲)
+        });
+    </script>
+</body>
+</html>
