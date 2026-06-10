@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古今考具大考验</title>
+    <style>
+        /* ================= 基础样式与古风背景 ================= */
+        body, html {
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            display: flex; justify-content: center; align-items: center;
+            background-color: #2c2724; /* 外围深木色背景 */
+            /* 使用楷体或宋体增强古风感 */
+            font-family: 'KaiTi', 'STKaiti', 'SimSun', serif; 
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            position: relative;
+            width: 640px; height: 1252px;
+            max-width: 100%; max-height: 100%;
+            aspect-ratio: 640 / 1252;
+            /* 宣纸底色 */
+            background-color: #e8e1d5; 
+            /* 模拟纸张纹理的细微径向渐变 */
+            background-image: radial-gradient(#dccfbc 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex; flex-direction: column; align-items: center;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            /* 移除了之前的 translateY 向上偏移，恢复正常居中流 */
+        }
+
+        /* ================= 头部与计时器 ================= */
+        .header {
+            width: 100%; text-align: center; 
+            /* === 修改点：大幅增加 padding-top 为 55px，留出手机顶部安全区，整体视角下移 === */
+            padding: 55px 0 15px;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0; font-size: 42px;
+            color: #8b2b2b; /* 古建筑朱红色 */
+            letter-spacing: 6px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+
+        .timer-box {
+            margin-top: 15px; font-size: 26px; font-weight: bold;
+            color: #4a3e35;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px 30px; border-radius: 8px;
+            display: inline-block;
+            /* 手绘风不规则边框 */
+            border: 2px solid #8b2b2b;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+            transition: color 0.3s, transform 0.2s;
+        }
+
+        /* 惩罚时的时间变红闪烁动画 */
+        .timer-box.penalty {
+            color: #ff0000;
+            transform: scale(1.1);
+            background: #ffe6e6;
+        }
+
+        .penalty-text {
+            /* === 修改点：跟随头部下移，同步调整 top 值，确保出现在计时器右侧 === */
+            position: absolute; right: 20%; top: 100px; 
+            color: red; font-size: 24px; font-weight: bold;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s, transform 0.5s ease-out;
+        }
+
+        /* ================= 游戏网格区 ================= */
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr); /* 9列 */
+            grid-template-rows: repeat(12, 1fr);  /* 12行 */
+            gap: 5px; 
+            width: 580px; height: 820px; /* 撑满页面核心区 */
+            margin-top: 5px; 
+            padding: 12px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 2px solid #bda88e;
+            border-radius: 12px;
+        }
+
+        /* 单个物品区块 (手绘边框风格) */
+        .item {
+            display: flex; justify-content: center; align-items: center;
+            background-color: #f6f0e4;
+            /* 重点：用特殊的 border-radius 模拟手绘的不规则方框 */
+            border: 1.5px solid #736154;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+            cursor: pointer;
+            box-shadow: 1px 2px 3px rgba(0,0,0,0.1);
+            transition: transform 0.1s ease, background-color 0.2s;
+            position: relative;
+        }
+
+        /* 内部图标包裹，方便添加复古滤镜和镜像反转以增加难度 */
+        .item-icon {
+            font-size: 36px;
+            /* 添加水墨复古滤镜，让emoji看起来不那么现代 */
+            filter: sepia(0.8) hue-rotate(-15deg) contrast(1.1) opacity(0.9);
+            
+            /* 【替换图片指南】：当您有自己的图片时，请在JS里设置 backgroundImage，并加上以下属性即可完美适配：*/
+            background-size: contain; 
+            background-position: center;
+            background-repeat: no-repeat;
+            width: 80%; height: 80%;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* 选中状态 */
+        .item.selected {
+            border-color: #8b2b2b; border-width: 2.5px;
+            background-color: #fce8e8;
+            transform: scale(1.1); z-index: 2;
+        }
+
+        /* 消除后的状态 */
+        .item.eliminated {
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transform: scale(0.1); transition: transform 0.3s, opacity 0.3s;
+        }
+
+        /* 点错时的错误震动动画 */
+        .item.shake {
+            animation: errorShake 0.4s;
+            border-color: #ff0000; background-color: #ffcccc;
+        }
+        @keyframes errorShake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-4px) rotate(-3deg); }
+            50% { transform: translateX(4px) rotate(3deg); }
+            75% { transform: translateX(-4px) rotate(-3deg); }
+            100% { transform: translateX(0); }
+        }
+
+        /* ================= 结算海报 (Modal) ================= */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100; opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+
+        .poster {
+            width: 500px; height: 750px;
+            background-color: #e8e1d5;
+            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><path d="M0 100 C 20 0 50 0 100 100 Z" fill="%23dccfbc" opacity="0.4"/></svg>');
+            border: 6px solid #8b2b2b;
+            /* 也是手绘边框 */
+            border-radius: 2% 98% 3% 97% / 97% 4% 96% 3%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            text-align: center; padding: 40px; box-sizing: border-box;
+        }
+
+        .poster-title { font-size: 70px; color: #8b2b2b; margin-bottom: 15px; font-weight: bold; }
+        .poster-time { font-size: 28px; color: #4a3e35; margin-bottom: 30px; font-weight: bold; }
+        .poster-desc { font-size: 26px; color: #333; line-height: 1.6; margin-bottom: 60px; }
+        
+        .restart-btn {
+            padding: 15px 50px; font-size: 26px; font-family: inherit; font-weight: bold;
+            color: #f6f0e4; background-color: #8b2b2b;
+            border: none; border-radius: 8px; cursor: pointer;
+            /* 手绘边框按钮 */
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+            box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3); transition: transform 0.2s;
+        }
+        .restart-btn:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>古今考具大考验</h1>
+        <div class="timer-box" id="timerDisplay">总用时: 00:00</div>
+        <div class="penalty-text" id="penaltyText">+3秒!</div>
+    </div>
+
+    <div class="game-board" id="gameBoard"></div>
+
+    <div class="modal-overlay" id="resultModal">
+        <div class="poster">
+            <div class="poster-title" id="rankTitle">状元</div>
+            <div class="poster-time" id="rankTime">最终用时: 00:00</div>
+            <div class="poster-desc" id="rankDesc">火眼金睛，明察秋毫！</div>
+            <button class="restart-btn" onclick="initGame()">再考一次</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ================= 1. 核心题库：18种高相似度考具 ================= */
+    const itemTypes = [
+        { id: 1, icon: '🖌️', style: '', bgImage: '', name: '毛笔正' },
+        { id: 2, icon: '🖌️', style: 'transform: scaleX(-1);', bgImage: '', name: '毛笔反' },
+        
+        { id: 3, icon: '🍵', style: '', bgImage: '', name: '茶杯正' },
+        { id: 4, icon: '🍵', style: 'transform: scaleX(-1);', bgImage: '', name: '茶杯反' },
+        
+        { id: 5, icon: '📜', style: '', bgImage: '', name: '黄卷轴' },
+        { id: 6, icon: '📜', style: 'filter: hue-rotate(120deg);', bgImage: '', name: '蓝卷轴' },
+        
+        { id: 7, icon: '⬛', style: '', bgImage: '', name: '方砚台' },
+        { id: 8, icon: '🔲', style: '', bgImage: '', name: '圆砚台' },
+        
+        { id: 9, icon: '🖋️', style: '', bgImage: '', name: '钢笔' },
+        { id: 10, icon: '🖊️', style: '', bgImage: '', name: '圆珠笔' },
+        
+        { id: 11, icon: '📐', style: '', bgImage: '', name: '三角尺' },
+        { id: 12, icon: '📏', style: '', bgImage: '', name: '直尺' },
+        
+        { id: 13, icon: '📚', style: '', bgImage: '', name: '书籍正' },
+        { id: 14, icon: '📚', style: 'transform: scaleY(-1);', bgImage: '', name: '书籍反' },
+        
+        { id: 15, icon: '💻', style: '', bgImage: '', name: '笔记本电脑' },
+        { id: 16, icon: '🖥️', style: '', bgImage: '', name: '台式电脑' },
+        
+        { id: 17, icon: '🪭', style: '', bgImage: '', name: '红折扇' },
+        { id: 18, icon: '🪭', style: 'filter: hue-rotate(200deg);', bgImage: '', name: '蓝折扇' }
+    ];
+
+    // ================= 2. 全局状态 =================
+    const TOTAL_CELLS = 108; // 9 * 12
+    const PAIRS_NEEDED = TOTAL_CELLS / 2; // 54对
+    
+    let boardData = [];      
+    let firstSelectedIdx = null;
+    let pairsFound = 0;      
+    let isAnimating = false; 
+    
+    let timerInterval = null;
+    let secondsElapsed = 0;
+    let gameStarted = false;
+
+    // DOM 元素引用
+    const boardEl = document.getElementById('gameBoard');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const penaltyText = document.getElementById('penaltyText');
+
+    // ================= 3. 核心功能 =================
+    function formatTime(totalSeconds) {
+        const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const s = (totalSeconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function startTimer() {
+        if (gameStarted) return;
+        gameStarted = true;
+        timerInterval = setInterval(() => {
+            secondsElapsed++;
+            timerDisplay.innerText = `总用时: ${formatTime(secondsElapsed)}`;
+        }, 1000);
+    }
+
+    function initGame() {
+        clearInterval(timerInterval);
+        secondsElapsed = 0;
+        pairsFound = 0;
+        firstSelectedIdx = null;
+        isAnimating = false;
+        gameStarted = false;
+        timerDisplay.innerText = "总用时: 00:00";
+        document.getElementById('resultModal').classList.remove('show');
+        boardEl.innerHTML = ''; 
+
+        boardData = [];
+        itemTypes.forEach(type => {
+            for (let i = 0; i < 6; i++) {
+                boardData.push({ ...type, eliminated: false });
+            }
+        });
+
+        // 打乱 (Fisher-Yates)
+        for (let i = boardData.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [boardData[i], boardData[j]] = [boardData[j], boardData[i]];
+        }
+
+        // 渲染到页面
+        boardData.forEach((item, index) => {
+            const cell = document.createElement('div');
+            cell.className = 'item';
+            cell.id = `cell-${index}`;
+            
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'item-icon';
+            
+            if (item.bgImage) {
+                iconSpan.style.backgroundImage = item.bgImage;
+                iconSpan.innerText = '';
+            } else {
+                iconSpan.innerText = item.icon;
+                if(item.style) iconSpan.style.cssText += item.style;
+            }
+
+            cell.appendChild(iconSpan);
+            cell.addEventListener('click', () => handleItemClick(index));
+            boardEl.appendChild(cell);
+        });
+    }
+
+    function triggerPenalty() {
+        secondsElapsed += 3; 
+        timerDisplay.innerText = `总用时: ${formatTime(secondsElapsed)}`;
+        
+        timerDisplay.classList.add('penalty');
+        penaltyText.style.opacity = '1';
+        penaltyText.style.transform = 'translateY(-20px)';
+        
+        setTimeout(() => {
+            timerDisplay.classList.remove('penalty');
+            penaltyText.style.opacity = '0';
+            penaltyText.style.transform = 'translateY(0)';
+        }, 600);
+    }
+
+    function handleItemClick(index) {
+        if (isAnimating) return; 
+        const item = boardData[index];
+        const cellDOM = document.getElementById(`cell-${index}`);
+
+        if (item.eliminated || firstSelectedIdx === index) return;
+
+        startTimer(); 
+
+        if (firstSelectedIdx === null) {
+            firstSelectedIdx = index;
+            cellDOM.classList.add('selected');
+        } else {
+            const firstItem = boardData[firstSelectedIdx];
+            const firstCellDOM = document.getElementById(`cell-${firstSelectedIdx}`);
+
+            if (firstItem.id === item.id) {
+                // ✅ 匹配成功
+                firstItem.eliminated = true;
+                item.eliminated = true;
+                
+                firstCellDOM.classList.remove('selected');
+                firstCellDOM.classList.add('eliminated');
+                cellDOM.classList.add('eliminated');
+                
+                pairsFound++;
+                if (pairsFound === PAIRS_NEEDED) {
+                    setTimeout(gameOver, 300); 
+                }
+            } else {
+                // ❌ 匹配失败
+                isAnimating = true;
+                cellDOM.classList.add('selected'); 
+                
+                firstCellDOM.classList.add('shake');
+                cellDOM.classList.add('shake');
+                
+                triggerPenalty();
+
+                setTimeout(() => {
+                    firstCellDOM.classList.remove('selected', 'shake');
+                    cellDOM.classList.remove('selected', 'shake');
+                    isAnimating = false;
+                }, 400); 
+            }
+            firstSelectedIdx = null;
+        }
+    }
+
+    // ================= 4. 游戏结束评级 =================
+    function gameOver() {
+        clearInterval(timerInterval);
+        
+        let title = "";
+        let desc = "";
+        if (secondsElapsed <= 75) {
+            title = "🥇 状 元";
+            desc = "恭喜你拔得头筹！能在满屏高仿陷阱中毫发无损，阁下这眼力绝对是火眼金睛！";
+        } else if (secondsElapsed <= 110) {
+            title = "🥈 榜 眼";
+            desc = "恭喜取得榜眼！虽偶有迟疑，但基本功十分扎实，再敏锐些便是状元郎！";
+        } else if (secondsElapsed <= 150) {
+            title = "🥉 探 花";
+            desc = "恭喜取得探花！顺利通关，不过似乎被那些相似的笔墨纸砚绊住了脚？";
+        } else {
+            title = "📜 进 士";
+            desc = "赐同进士出身！学海无涯，做学问还需再多几分细心与耐心哟！";
+        }
+
+        document.getElementById('rankTitle').innerText = title;
+        document.getElementById('rankTime').innerText = `最终用时: ${formatTime(secondsElapsed)}`;
+        document.getElementById('rankDesc').innerText = desc;
+        
+        document.getElementById('resultModal').classList.add('show');
+    }
+
+    window.onload = initGame;
+</script>
+</body>
+</html>
